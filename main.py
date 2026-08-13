@@ -1,9 +1,12 @@
 import sys
 import config
+import pandas as pd
 from data_io import choose_file, load_file, get_ticker_data
 from model import get_predictions
 from anomaly import detect_anomaly
 from trend import detect_trend
+
+
 
 def main():
     # --- Data ---
@@ -24,9 +27,9 @@ def main():
     print(f"Length: {anomaly.length} days | z = {anomaly.z_score}\n")
 
     # --- Model ---
-    # TODO put model code here
     horizon = max(config.TREND_LENGTH)
-    predicted_returns = get_predictions(horizon)
+    recent_returns = stock_data[stock_data["date"] <= pd.Timestamp(scan_date)]["log_return_1d"].head(config.ANOMALY_BASELINE_WINDOW).values
+    predicted_returns = get_predictions(recent_returns, horizon=horizon)
 
     # --- Trend ---
     trend_label = detect_trend(anomaly, predicted_returns)
@@ -35,6 +38,7 @@ def main():
         print(f"The anomaly between {anomaly.start} and {anomaly.end} will develop into a trend in the next {horizon} days")
     else:
         print(f"The anomaly between {anomaly.start} and {anomaly.end} will NOT develop into a trend in the next {horizon} days")
+
 
 if __name__ == "__main__":
     try:
