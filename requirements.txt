@@ -1,0 +1,10 @@
+# Core data processing
+numpy
+pandas
+
+# Excel file support
+openpyxl
+xlrd
+
+# Parquet file support
+pyarrow

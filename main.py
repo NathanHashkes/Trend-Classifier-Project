@@ -41,5 +41,3 @@ if __name__ == "__main__":
         main()
     except (FileNotFoundError, ValueError, KeyError) as exc:
         sys.exit(f"\nError: {exc}\n")
-
-# This is a test commit 1
