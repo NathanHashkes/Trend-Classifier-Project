@@ -1,6 +1,7 @@
 import pandas as pd
 import torch
 import torch.nn as nn
+from data_io import choose_file
 from torch.utils.data import DataLoader, Dataset
 from model import LSTMModel
 import config
@@ -10,11 +11,31 @@ BATCH_SIZE = 32
 EPOCHS = 10
 LEARNING_RATE = 0.001
 TRAIN_CUTOFF_DATE = "2023-12-31"
-MODEL_SAVE_PATH = "lstm_model.pt"
-DATA_PATH = "stocks_data_ready.parquet"
+DATA_PATH = choose_file()
 
 INPUT_WINDOW = config.ANOMALY_BASELINE_WINDOW  #[cite: 2]
 HORIZON = max(config.TREND_LENGTH)
+
+
+# --- LSTM ---
+class LSTMModel(nn.Module):
+
+    def __init__(self, input_size=1, hidden_size=64, horizon=60):
+        super().__init__()
+        # Process the time series
+        self.lstm = nn.LSTM(input_size=input_size, hidden_size=hidden_size, batch_first=True)
+        # Output layer --> horizon vector
+        self.fc = nn.Linear(hidden_size, horizon)
+
+    def forward(self, x):
+        # X input: (batch_size, sequence_length, input_size)
+        lstm_out, _ = self.lstm(x)
+        # Window last day. contains all hidden State
+        last_hidden_state = lstm_out[:, -1, :]
+        # Send to output layer
+        out = self.fc(last_hidden_state)
+        return out
+
 
 
 class StockWindowDataset(Dataset):
@@ -68,7 +89,7 @@ def train():
             optimizer.step()  # update weights
 
             total_loss += loss.item()
-
+        break
         avg_loss = total_loss / len(dataloader)
         print(f"Epoch [{epoch + 1}/{EPOCHS}] - Loss: {avg_loss:.6f}")
 

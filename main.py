@@ -1,7 +1,6 @@
 import sys
 import config
-import pandas as pd
-from data_io import choose_file, load_file, get_ticker_data
+from data_io import choose_file, load_file, get_ticker_data, get_model_input_data
 from model import get_predictions
 from anomaly import detect_anomaly
 from trend import detect_trend
@@ -11,13 +10,13 @@ from trend import detect_trend
 def main():
     # --- Data ---
     path = choose_file()
-    data = load_file(path)
+    data = load_file(path, config.REQUIRED_COLUMNS)
     ticker_name = input("Enter ticker: ")
     stock_data = get_ticker_data(data, ticker_name) # Also prints how many rows - and what dates - it got.
 
     # --- Anomaly ---
-    scan_date = config.SCAN_DATE
-    anomaly = detect_anomaly(stock_data, scan_date=scan_date) # Can change scan date here
+    scan_date = config.SCAN_DATE # Can change scan date here
+    anomaly = detect_anomaly(stock_data, scan_date=scan_date)
  
     if anomaly is None:
         print(f"No anomaly found at {scan_date}.")
@@ -27,9 +26,10 @@ def main():
     print(f"Length: {anomaly.length} days | z = {anomaly.z_score}\n")
 
     # --- Model ---
+    data = load_file(path, config.REQUIRED_MODEL_COLUMNS)
+    model_input = get_model_input_data(data, ticker_name, scan_date)
     horizon = max(config.TREND_LENGTH)
-    recent_returns = stock_data[stock_data["date"] <= pd.Timestamp(scan_date)]["log_return_1d"].head(config.ANOMALY_BASELINE_WINDOW).values
-    predicted_returns = get_predictions(recent_returns, horizon=horizon)
+    predicted_returns = get_predictions(model_input, horizon)
 
     # --- Trend ---
     trend_label = detect_trend(anomaly, predicted_returns)
@@ -38,6 +38,7 @@ def main():
         print(f"The anomaly between {anomaly.start} and {anomaly.end} will develop into a trend in the next {horizon} days")
     else:
         print(f"The anomaly between {anomaly.start} and {anomaly.end} will NOT develop into a trend in the next {horizon} days")
+
 
 
 if __name__ == "__main__":
