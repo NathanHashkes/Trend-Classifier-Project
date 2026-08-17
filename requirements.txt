@@ -8,3 +8,6 @@ xlrd
 
 # Parquet file support
 pyarrow
+
+# ML libraries
+torch

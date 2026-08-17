@@ -12,3 +12,4 @@ venv/
 
 # IDE/user-specific files
 .vscode/
+.idea/

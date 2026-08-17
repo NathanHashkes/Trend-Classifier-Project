@@ -3,7 +3,6 @@ import torch
 import torch.nn as nn
 from data_io import choose_file
 from torch.utils.data import DataLoader, Dataset
-from model import LSTMModel
 import config
 
 
@@ -13,7 +12,7 @@ LEARNING_RATE = 0.001
 TRAIN_CUTOFF_DATE = "2023-12-31"
 DATA_PATH = choose_file()
 
-INPUT_WINDOW = config.ANOMALY_BASELINE_WINDOW  #[cite: 2]
+INPUT_WINDOW = config.ANOMALY_BASELINE_WINDOW
 HORIZON = max(config.TREND_LENGTH)
 
 
@@ -89,7 +88,7 @@ def train():
             optimizer.step()  # update weights
 
             total_loss += loss.item()
-        break
+        #break
         avg_loss = total_loss / len(dataloader)
         print(f"Epoch [{epoch + 1}/{EPOCHS}] - Loss: {avg_loss:.6f}")
 

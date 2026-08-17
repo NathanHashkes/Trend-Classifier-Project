@@ -3,7 +3,7 @@ import config
 from pathlib import Path
 
 def get_predictions(input_data, horizon):
-    """Gets a input dataframe with data that the model needs
+    """Gets an input dataframe with data that the model needs
     
         Returns predictions up to the requested horizon.
         
